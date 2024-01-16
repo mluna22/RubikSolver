@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from matplotlib import widgets
 from projection import Quaternion, project_points
 from __init__ import EfficientCube
+from time import sleep
 
 """
 Sticker representation
@@ -47,6 +48,7 @@ canonical position.
 class Cube:
     """Magic Cube Representation"""
     # define some attribues
+    
     default_plastic_color = 'black'
     default_face_colors = ["w", "#ffcf00",
                            "#00008f", "#009f0f",
@@ -196,12 +198,13 @@ class Cube:
                                                 M.T)
 
     def draw_interactive(self):
-        fig = plt.figure(figsize=(5, 5))
+        fig = plt.figure(figsize=(10, 7))
         fig.add_axes(InteractiveCube(self))
         return fig
 
 
 class InteractiveCube(plt.Axes):
+    beam_width = 1024
     def __init__(self, cube=None,
                  interactive=True,
                  view=(0, 0, 10),
@@ -283,7 +286,7 @@ class InteractiveCube(plt.Axes):
                          "U/D/L/R/B/F keys turn faces\n"
                          "(hold shift for counter-clockwise)",
                          size=10)
-        self.figure.text(0.05, 0.90,
+        self.solutionText = self.figure.text(0.05, 0.90,
                          "Movements to solve:\n",
                          size=10)
 
@@ -298,7 +301,7 @@ class InteractiveCube(plt.Axes):
 
         self._ax_solve_deep = self.figure.add_axes([0.75, 0.05, 0.2, 0.075])
         self._btn_solve_deep = widgets.Button(self._ax_solve_deep, 'Solve Cube Deep')
-        self._btn_solve_deep.on_clicked(self._solve_cube) #Change after new function
+        self._btn_solve_deep.on_clicked(self._solve_cube_deep) 
 
     def _project(self, pts):
         return project_points(pts, self._current_rot, self._view, [0, 1, 0])
@@ -348,9 +351,10 @@ class InteractiveCube(plt.Axes):
     def rotate_face(self, face, turns=1, layer=0, steps=5):
         if not np.allclose(turns, 0):
             for i in range(steps):
+                self._draw_cube()
                 self.cube.rotate_face(face, turns * 1. / steps,
                                       layer=layer)
-                self._draw_cube()
+            self._draw_cube()
 
     def _reset_view(self, *args):
         self.set_xlim(self._start_xlim)
@@ -363,17 +367,39 @@ class InteractiveCube(plt.Axes):
         for (face, n, layer) in move_list[::-1]:
             self.rotate_face(face, -n, layer, steps=3)
         self.cube._move_list = []
+        
 
     # Solve Rubiks cube with DeepLearning algorithm
     def _solve_cube_deep(self, *args):
         
-        move_list = self.cube._move_list[:]
-        print(move_list)
-        # make the necesary movements to solve
         solver = EfficientCube()
-        for (face, n, layer) in move_list[::-1]:
-            self.rotate_face(face, -n, layer, steps=3)
+        solver.apply_moves_to_env(self._format_to_solve(self.cube._move_list))
+        result = solver.solve(self.beam_width)
+        self.solutionText.set_text(
+            "Movements to solve:\n" + 
+            ' '.join(result['solutions']))
+        self.solutionText = self.figure.text(0.05, 0.85,
+                         "\n\nTime: " + str(round(result['times'],4)) + " seconds",
+                         size=10)
+        
+        for (face) in result['solutions']:
+            self.rotate_face(face[0], -1 if len(face) == 2 else 1, 0, steps=1)
         self.cube._move_list = []
+
+    #check elements and convert to EficientCubeFormat
+    def _format_to_solve(self,list):
+        result = ""
+        
+        for (face, n, layer) in list:
+            
+            #check clockwise or not
+            if (n > 1):
+                result += " " + face + " " + face
+            elif (n == 1):
+                result += " " + face
+            elif (n == -1):
+                result += " " + face + "'"
+        return result
 
     def _key_press(self, event):
         """Handler for key press events"""

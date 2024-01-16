@@ -34,9 +34,7 @@ class EfficientCube:
         if model_path.lower().strip()=="auto":
             script_dir = os.path.dirname(os.path.abspath(__file__))
             model_path = {
-                "Rubik's Cube": "./models/cube3.pth",
-                "15 Puzzle": "./models/puzzle15.pth",
-                "Lights Out": "./models/lightsout7.pth"
+                "Rubik's Cube": "./models/cube3.pth"
             }[env]
             model_path = os.path.normpath(os.path.join(script_dir, model_path))
         assert os.path.exists(model_path), f"Model file not found at `{model_path}`"
