@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import widgets
 from projection import Quaternion, project_points
+from __init__ import EfficientCube
 
 """
 Sticker representation
@@ -283,7 +284,7 @@ class InteractiveCube(plt.Axes):
                          "(hold shift for counter-clockwise)",
                          size=10)
         self.figure.text(0.05, 0.90,
-                         "Pasos a seguir para solución: \n",
+                         "Movements to solve:\n",
                          size=10)
 
     def _initialize_widgets(self):
@@ -297,7 +298,7 @@ class InteractiveCube(plt.Axes):
 
         self._ax_solve_deep = self.figure.add_axes([0.75, 0.05, 0.2, 0.075])
         self._btn_solve_deep = widgets.Button(self._ax_solve_deep, 'Solve Cube Deep')
-        self._btn_solve_deep.on_clicked(self._solve_cube) #Cambiar luego la funcion
+        self._btn_solve_deep.on_clicked(self._solve_cube) #Change after new function
 
     def _project(self, pts):
         return project_points(pts, self._current_rot, self._view, [0, 1, 0])
@@ -359,6 +360,17 @@ class InteractiveCube(plt.Axes):
 
     def _solve_cube(self, *args):
         move_list = self.cube._move_list[:]
+        for (face, n, layer) in move_list[::-1]:
+            self.rotate_face(face, -n, layer, steps=3)
+        self.cube._move_list = []
+
+    # Solve Rubiks cube with DeepLearning algorithm
+    def _solve_cube_deep(self, *args):
+        
+        move_list = self.cube._move_list[:]
+        print(move_list)
+        # make the necesary movements to solve
+        solver = EfficientCube()
         for (face, n, layer) in move_list[::-1]:
             self.rotate_face(face, -n, layer, steps=3)
         self.cube._move_list = []

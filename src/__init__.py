@@ -7,9 +7,9 @@ For training, please refer to the notebooks listed at https://github.com/kyo-tak
 
 import os
 import torch
-from .environments import load_environment
-from .model import Model, ScalableModel
-from . import search
+from environments import load_environment
+from model import Model, ScalableModel
+import search
 
 class EfficientCube:
     def __init__(
@@ -28,7 +28,7 @@ class EfficientCube:
         """
 
         # Set up Rubik's Cube environment
-        self.env = load_environment(env)
+        self.env = load_environment()
         
         # If model_path is set to "auto", use default paths based on the environment
         if model_path.lower().strip()=="auto":

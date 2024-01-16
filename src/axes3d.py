@@ -96,7 +96,7 @@ class PolyView3D(plt.Axes):
         self._polys += polys
         self._npts += list(npts)
         self._xyzs = np.vstack([self._xyzs] + xyzs)
-        self._xys = np.array(self._xyzs[:, :2], dtype=float_)
+        self._xys = np.array(self._xyzs[:, :2], dtype=float)
 
         [self.add_patch(p) for p in polys]
         self._update_projection()
