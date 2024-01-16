@@ -282,15 +282,22 @@ class InteractiveCube(plt.Axes):
                          "U/D/L/R/B/F keys turn faces\n"
                          "(hold shift for counter-clockwise)",
                          size=10)
+        self.figure.text(0.05, 0.90,
+                         "Pasos a seguir para solución: \n",
+                         size=10)
 
     def _initialize_widgets(self):
-        self._ax_reset = self.figure.add_axes([0.75, 0.05, 0.2, 0.075])
+        self._ax_reset = self.figure.add_axes([0.35, 0.05, 0.2, 0.075])
         self._btn_reset = widgets.Button(self._ax_reset, 'Reset View')
         self._btn_reset.on_clicked(self._reset_view)
 
         self._ax_solve = self.figure.add_axes([0.55, 0.05, 0.2, 0.075])
         self._btn_solve = widgets.Button(self._ax_solve, 'Solve Cube')
         self._btn_solve.on_clicked(self._solve_cube)
+
+        self._ax_solve_deep = self.figure.add_axes([0.75, 0.05, 0.2, 0.075])
+        self._btn_solve_deep = widgets.Button(self._ax_solve_deep, 'Solve Cube Deep')
+        self._btn_solve_deep.on_clicked(self._solve_cube) #Cambiar luego la funcion
 
     def _project(self, pts):
         return project_points(pts, self._current_rot, self._view, [0, 1, 0])
