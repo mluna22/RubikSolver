@@ -287,23 +287,28 @@ class InteractiveCube(plt.Axes):
                          "U/D/L/R/B/F keys turn faces\n"
                          "(hold shift for counter-clockwise)",
                          size=10)
-        self.solutionText = self.figure.text(0.05, 0.90,
-                         "Movements to solve:\n",
+        self.scrambleText = self.figure.text(0.05, 0.90, "",
                          size=10)
-        self.timeText = self.figure.text(0.05, 0.85, "",
+        self.solutionText = self.figure.text(0.05, 0.85, "",
+                         size=10)
+        self.timeText = self.figure.text(0.05, 0.80, "",
                          size=10)
 
     def _initialize_widgets(self):
-        self._ax_reset = self.figure.add_axes([0.35, 0.05, 0.2, 0.075])
+        self._ax_reset = self.figure.add_axes([0.35, 0.05, 0.15, 0.075])
         self._btn_reset = widgets.Button(self._ax_reset, 'Reset View')
         self._btn_reset.on_clicked(self._reset_view)
 
-        self._ax_solve = self.figure.add_axes([0.55, 0.05, 0.2, 0.075])
+        self._ax_solve = self.figure.add_axes([0.50, 0.05, 0.15, 0.075])
         self._btn_solve = widgets.Button(self._ax_solve, 'Reset Cube')
-        self._btn_solve.on_clicked(self._solve_cube)
+        self._btn_solve.on_clicked(self._reset_cube)
 
-        self._ax_solve_deep = self.figure.add_axes([0.75, 0.05, 0.2, 0.075])
-        self._btn_solve_deep = widgets.Button(self._ax_solve_deep, 'Solve Cube')
+        self._ax_scramble = self.figure.add_axes([0.65, 0.05, 0.15, 0.075])
+        self._btn_scramble = widgets.Button(self._ax_scramble, 'Scramble')
+        self._btn_scramble.on_clicked(self._scramble_cube)
+
+        self._ax_solve_deep = self.figure.add_axes([0.80, 0.05, 0.15, 0.075])
+        self._btn_solve_deep = widgets.Button(self._ax_solve_deep, 'Solve')
         self._btn_solve_deep.on_clicked(self._solve_cube_deep) 
 
     def _project(self, pts):
@@ -354,10 +359,10 @@ class InteractiveCube(plt.Axes):
     def rotate_face(self, face, turns=1, layer=0, steps=5):
         if not np.allclose(turns, 0):
             for i in range(steps):
-                self._draw_cube()
                 self.cube.rotate_face(face, turns * 1. / steps,
                                       layer=layer)
-            self._draw_cube()
+                self._draw_cube()
+        self.scrambleText.set_text("Scramble: " + self._format_to_solve(self.cube._move_list))
 
     def _reset_view(self, *args):
         self.set_xlim(self._start_xlim)
@@ -365,12 +370,22 @@ class InteractiveCube(plt.Axes):
         self._current_rot = self._start_rot
         self._draw_cube()
 
-    def _solve_cube(self, *args):
+    def _reset_cube(self, *args):
         move_list = self.cube._move_list[:]
         for (face, n, layer) in move_list[::-1]:
             self.rotate_face(face, -n, layer, steps=3)
         self.cube._move_list = []
+        self.scrambleText.set_text("")
+        self.solutionText.set_text("")
+        self.timeText.set_text("")
+        self.figure.canvas.draw()
         
+    def _scramble_cube(self, *args):
+        for _ in range(30):
+            face = np.random.choice(['F','B','U','D','L','R'])
+            direction = np.random.choice([1,-1])
+            self.rotate_face(face, direction, 0, steps=1)
+        self.figure.canvas.draw()
 
     # Solve Rubiks cube with DeepLearning algorithm
     def _solve_cube_deep(self, *args):
@@ -378,13 +393,18 @@ class InteractiveCube(plt.Axes):
         self.solver.apply_moves_to_env(self._format_to_solve(self.cube._move_list))
         result = self.solver.solve(self.beam_width)
         self.solutionText.set_text(
-            "Movements to solve:\n" + 
+            "Movements to solve: " + str(len(result['solutions'])) + '\n' +
             ' '.join(result['solutions']))
         self.timeText.set_text("\n\nTime: " + str(round(result['times'],4)) + " seconds")
-        
+        self.scrambleText.set_text("Scramble: " + self._format_to_solve(self.cube._move_list))
+
+        temp = self.scrambleText.get_text()
         for (face) in result['solutions']:
             self.rotate_face(face[0], -1 if len(face) == 2 else 1, 0, steps=1)
+        self.scrambleText.set_text(temp)
         self.cube._move_list = []
+
+        self.figure.canvas.draw()
 
     #check elements and convert to EficientCubeFormat
     def _format_to_solve(self,list):
@@ -395,9 +415,9 @@ class InteractiveCube(plt.Axes):
             #check clockwise or not
             if (n > 1):
                 result += " " + face + " " + face
-            elif (n == 1):
+            elif (n > 0):
                 result += " " + face
-            elif (n == -1):
+            elif (n < 0):
                 result += " " + face + "'"
         return result
 
