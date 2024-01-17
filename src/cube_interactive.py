@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 from matplotlib import widgets
 from projection import Quaternion, project_points
 from __init__ import EfficientCube
-from time import sleep
 
 """
 Sticker representation
