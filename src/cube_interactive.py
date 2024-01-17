@@ -384,7 +384,6 @@ class InteractiveCube(plt.Axes):
             face = np.random.choice(['F','B','U','D','L','R'])
             direction = np.random.choice([1,-1])
             self.rotate_face(face, direction, 0, steps=1)
-        self.scrambleText.set_text("")
         self.solutionText.set_text("")
         self.timeText.set_text("")
         self.figure.canvas.draw()
