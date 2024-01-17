@@ -289,6 +289,8 @@ class InteractiveCube(plt.Axes):
         self.solutionText = self.figure.text(0.05, 0.90,
                          "Movements to solve:\n",
                          size=10)
+        self.timeText = self.figure.text(0.05, 0.85, "",
+                         size=10)
 
     def _initialize_widgets(self):
         self._ax_reset = self.figure.add_axes([0.35, 0.05, 0.2, 0.075])
@@ -378,9 +380,7 @@ class InteractiveCube(plt.Axes):
         self.solutionText.set_text(
             "Movements to solve:\n" + 
             ' '.join(result['solutions']))
-        self.solutionText = self.figure.text(0.05, 0.85,
-                         "\n\nTime: " + str(round(result['times'],4)) + " seconds",
-                         size=10)
+        self.timeText.set_text("\n\nTime: " + str(round(result['times'],4)) + " seconds")
         
         for (face) in result['solutions']:
             self.rotate_face(face[0], -1 if len(face) == 2 else 1, 0, steps=1)
