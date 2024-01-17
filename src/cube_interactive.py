@@ -291,7 +291,7 @@ class InteractiveCube(plt.Axes):
                          size=10)
         self.solutionText = self.figure.text(0.05, 0.85, "",
                          size=10)
-        self.timeText = self.figure.text(0.05, 0.80, "",
+        self.timeText = self.figure.text(0.05, 0.82, "",
                          size=10)
 
     def _initialize_widgets(self):
@@ -395,7 +395,7 @@ class InteractiveCube(plt.Axes):
         self.solutionText.set_text(
             "Movements to solve: " + str(len(result['solutions'])) + '\n' +
             ' '.join(result['solutions']))
-        self.timeText.set_text("\n\nTime: " + str(round(result['times'],4)) + " seconds")
+        self.timeText.set_text("Time: " + str(round(result['times'],4)) + " seconds")
         self.scrambleText.set_text("Scramble: " + self._format_to_solve(self.cube._move_list))
 
         temp = self.scrambleText.get_text()
