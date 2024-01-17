@@ -220,6 +220,7 @@ class InteractiveCube(plt.Axes):
         self._view = view
         self._start_rot = Quaternion.from_v_theta((1, -1, 0),
                                                   -np.pi / 6)
+        self.solver = EfficientCube()
 
         if fig is None:
             fig = plt.gcf()
@@ -298,11 +299,11 @@ class InteractiveCube(plt.Axes):
         self._btn_reset.on_clicked(self._reset_view)
 
         self._ax_solve = self.figure.add_axes([0.55, 0.05, 0.2, 0.075])
-        self._btn_solve = widgets.Button(self._ax_solve, 'Solve Cube')
+        self._btn_solve = widgets.Button(self._ax_solve, 'Reset Cube')
         self._btn_solve.on_clicked(self._solve_cube)
 
         self._ax_solve_deep = self.figure.add_axes([0.75, 0.05, 0.2, 0.075])
-        self._btn_solve_deep = widgets.Button(self._ax_solve_deep, 'Solve Cube Deep')
+        self._btn_solve_deep = widgets.Button(self._ax_solve_deep, 'Solve Cube')
         self._btn_solve_deep.on_clicked(self._solve_cube_deep) 
 
     def _project(self, pts):
@@ -374,9 +375,8 @@ class InteractiveCube(plt.Axes):
     # Solve Rubiks cube with DeepLearning algorithm
     def _solve_cube_deep(self, *args):
         
-        solver = EfficientCube()
-        solver.apply_moves_to_env(self._format_to_solve(self.cube._move_list))
-        result = solver.solve(self.beam_width)
+        self.solver.apply_moves_to_env(self._format_to_solve(self.cube._move_list))
+        result = self.solver.solve(self.beam_width)
         self.solutionText.set_text(
             "Movements to solve:\n" + 
             ' '.join(result['solutions']))
