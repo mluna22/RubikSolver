@@ -30,3 +30,8 @@ python src/cube_interactive.py
     - `R`: Right
     - `F`: Front
     - `B`: Back
+
+
+## Demo
+
+![demo](demo.gif)
